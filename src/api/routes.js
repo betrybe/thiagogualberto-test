@@ -1,9 +1,11 @@
-const { Router } = require('express');
+const express = require('express');
 
-const UserController = require('../app/controllers/UserController');
+const routes = express.Router();
 
-const routes = new Router();
+// Controllers
+const UserController = require('../controllers/UserController');
 
+// User Routes
 routes.post('/users', UserController.store);
 /* routes.post('/users', (req, res) => {
     return res.json({ message: 'Ops' });
