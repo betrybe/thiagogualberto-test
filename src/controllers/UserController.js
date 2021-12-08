@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('../models/Users');
 
 function validateEmail(email) {
     const re = /\S+@\S+\.\S+/;
