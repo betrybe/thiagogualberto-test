@@ -18,6 +18,7 @@ routes.post('/users', UserController.store);
 
 // Recipes Routes
 routes.get('/recipes', RecipesController.index);
+routes.get('/recipes/:id', RecipesController.show);
 routes.use(authMiddleware.validateToken);
 routes.post('/recipes', RecipesController.store);
 

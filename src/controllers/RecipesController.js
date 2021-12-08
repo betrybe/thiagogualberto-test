@@ -10,6 +10,19 @@ module.exports = {
             });
 
     },
+    async show(req, res) {
+        const { id } = req.params;
+        
+        try {
+            const recipe = await Recipes.findById(id);
+
+            return res.status(200).json(recipe);
+        } catch (err) {
+            return res.status(404).json({ 
+                message: 'recipe not found',
+            });
+        }
+    },
     async store(req, res) {
         const { name, ingredients, preparation } = req.body;
         const userId = req.id;
