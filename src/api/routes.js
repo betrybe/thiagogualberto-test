@@ -22,5 +22,6 @@ routes.get('/recipes/:id', RecipesController.show);
 routes.use(authMiddleware.validateToken);
 routes.post('/recipes', RecipesController.store);
 routes.put('/recipes/:id', RecipesController.update);
+routes.delete('/recipes/:id', RecipesController.delete);
 
 module.exports = routes;

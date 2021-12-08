@@ -54,4 +54,19 @@ module.exports = {
             return res.status(200).json(recipeUpdated);
         }        
     },
+    async delete(req, res) {        
+        const { id } = req.params;
+        
+        const userId = req.id;
+        const userRole = req.role;
+        
+        const recipe = await Recipes.findById(id);
+        if (!recipe) {
+            return res.status(404).json({ message: 'recipe not found' });            
+        }
+        if ((userId === recipe.userId) || (userRole === 'admin')) {
+            await Recipes.findOneAndDelete(id);
+            return res.status(204).json();
+        }        
+    },
 };
