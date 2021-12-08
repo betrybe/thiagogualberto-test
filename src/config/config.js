@@ -1,6 +1,6 @@
 module.exports = {
     jwt: {
-      secret: 'f95961443708ad52152859ab1f73e4da',
+      secret: 'e71c1034273196e274bfb8166988f3c1',
       expiresIn: '1d',
     },
 };
