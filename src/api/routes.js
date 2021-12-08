@@ -4,11 +4,12 @@ const routes = express.Router();
 
 // Controllers
 const UserController = require('../controllers/UserController');
+const LoginController = require('../controllers/LoginController');
+
+// Login Route
+routes.post('/login', LoginController.login);
 
 // User Routes
 routes.post('/users', UserController.store);
-/* routes.post('/users', (req, res) => {
-    return res.json({ message: 'Ops' });
-}); */
 
 module.exports = routes;
