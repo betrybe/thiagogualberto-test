@@ -17,8 +17,8 @@ routes.post('/login', LoginController.login);
 routes.post('/users', UserController.store);
 
 // Recipes Routes
+routes.get('/recipes', RecipesController.index);
 routes.use(authMiddleware.validateToken);
-routes.post('/recipes', authMiddleware.validateToken, RecipesController.store);
-// routes.get('/recipes', RecipesController.index);
+routes.post('/recipes', RecipesController.store);
 
 module.exports = routes;
