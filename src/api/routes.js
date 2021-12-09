@@ -2,13 +2,21 @@ const express = require('express');
 
 const routes = express.Router();
 
+// Resourcer for image upload
+const multer = require('multer');
+const uploadConfig = require('../middlewares/upload');
+
 // Controllers
 const UserController = require('../controllers/UserController');
 const LoginController = require('../controllers/LoginController');
 const RecipesController = require('../controllers/RecipesController');
+const ImageController = require('../controllers/ImageController');
 
 // Middlewares
 const authMiddleware = require('../middlewares/auth');
+
+// Instance multer
+const upload = multer(uploadConfig);
 
 // Login Route
 routes.post('/login', LoginController.login);
@@ -26,5 +34,8 @@ routes.delete('/recipes/:id', RecipesController.delete);
 
 // Admin User Routes
 routes.post('/users/admin', UserController.storeAdmin);
+
+// Image Recipe Routes
+routes.put('/recipes/:id/image', upload.single('image'), ImageController.update);
 
 module.exports = routes;
