@@ -24,4 +24,7 @@ routes.post('/recipes', RecipesController.store);
 routes.put('/recipes/:id', RecipesController.update);
 routes.delete('/recipes/:id', RecipesController.delete);
 
+// Admin User Routes
+routes.post('/users/admin', UserController.storeAdmin);
+
 module.exports = routes;

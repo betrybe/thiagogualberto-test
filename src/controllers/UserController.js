@@ -33,4 +33,25 @@ module.exports = {
 
         return res.status(201).json({ user });
     },
+    async storeAdmin(req, res) {
+        if (req.role !== 'admin') {        
+            return res.status(403).json({ message: 'Only admins can register new admins' });
+        }
+
+        const { name, email, password } = req.body;
+
+        const validadeData = validateInfos(name, email, password);
+        if ((!validadeData) || (!validateEmail(email))) {
+            return res.status(400).json({ message: 'Invalid entries. Try again.' });
+        }
+        
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            return res.status(409).json({ message: 'Email already registered' });
+        }
+
+        const user = await User.create({ name, email, password, role: 'admin' });
+
+        return res.status(201).json({ user });
+    },
 };
