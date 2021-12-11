@@ -1,3 +1,4 @@
+const { error } = require('console');
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
 const authConfig = require('../config/config');
@@ -19,7 +20,22 @@ module.exports = {
             return next();
         } catch (err) { // Invalid Token
             return res.status(401).json({ message: 'jwt malformed' });
-            // return res.status(401).json(err);
+        }
+    },
+    async validateAdmin(req, res, next) {
+        const token = req.headers.authorization;
+
+        try {
+            const decode = await promisify(jwt.verify)(token, authConfig.jwt.secret);
+            
+            req.role = decode.role;
+            
+            if (req.role !== 'admin') {
+                throw error;
+            }
+            return next();
+        } catch (err) {
+            return res.status(403).json({ message: 'Only admins can register new admins' });
         }
     },
 };
