@@ -1,72 +1,75 @@
-const Recipes = require('../models/Recipes');
+const mongoose = require('mongoose');
+
+const CreateRecipeService = require('../services/CreateRecipeService');
+const ListAllRecipesService = require('../services/ListAllRecipesService');
+const ListRecipeService = require('../services/ListRecipeService');
+const UpdateRecipeService = require('../services/UpdateRecipeService');
+const DeleteRecipeService = require('../services/DeleteRecipeService');
 
 module.exports = {
     async index(req, res) {
-        await Recipes.find({}, { name: 1, ingredients: 1, preparation: 1, userId: 1 })
-            .then((recipes) => {
-                return res.status(200).json(recipes);
-            }).catch((err) => {
-                return res.status(400).json({ err });
-            });
-
+        const { status, recipes } = await ListAllRecipesService.execute();
+        
+        return res.status(status).json(recipes);
     },
     async show(req, res) {
         const { id } = req.params;
-        
-        try {
-            const recipe = await Recipes.findById(id);
 
-            return res.status(200).json(recipe);
-        } catch (err) {
-            return res.status(404).json({ 
-                message: 'recipe not found',
-            });
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(404).json({ message: 'recipe not found' });
         }
+        
+        const { status, err, recipe } = await ListRecipeService.execute(id);
+
+        if (err) return res.status(status).json({ message: err.message });
+        
+        return res.status(status).json(recipe);
     },
     async store(req, res) {
         const { name, ingredients, preparation } = req.body;
         const userId = req.id;
 
-        if ((name === undefined) || (ingredients === undefined) || (preparation === undefined)) {
+        if (!name || !ingredients || !preparation) {
             return res.status(400).json({ message: 'Invalid entries. Try again.' });
         }
 
-        const data = { name, ingredients, preparation, userId, image: '' };
+        const data = { 
+            name, 
+            ingredients, 
+            preparation, 
+            userId, 
+            image: '',
+        };
 
-        const recipe = await Recipes.create(data);
+        const { status, err, recipe } = await CreateRecipeService.execute(data);
         
-        return res.status(201).json({ recipe });
+        if (err) return res.status(status).json({ message: err.message });
+        return res.status(status).json({ recipe });
     },
     async update(req, res) {        
         const { id } = req.params;
         const { name, ingredients, preparation } = req.body;
         const userId = req.id;
-        const userRole = req.role;
+
+        const data = {
+            id,
+            name, 
+            ingredients, 
+            preparation, 
+            userId, 
+        };
         
-        const recipe = await Recipes.findById(id);
-        if (!recipe) {
-            return res.status(404).json({ message: 'recipe not found' });            
-        }
-        if ((userId === recipe.userId) || (userRole === 'admin')) {
-            const recipeUpdated = await Recipes.findOneAndUpdate(id, {
-                name, ingredients, preparation, userId,
-            }, { new: true });
-            return res.status(200).json(recipeUpdated);
-        }        
+        const { status, err, recipeUpdated } = await UpdateRecipeService.execute(data);
+        
+        if (err) return res.status(status).json({ message: err.message });
+        return res.status(status).json(recipeUpdated);     
     },
     async delete(req, res) {        
         const { id } = req.params;
         
-        const userId = req.id;
-        const userRole = req.role;
-        
-        const recipe = await Recipes.findById(id);
-        if (!recipe) {
-            return res.status(404).json({ message: 'recipe not found' });            
-        }
-        if ((userId === recipe.userId) || (userRole === 'admin')) {
-            await Recipes.findOneAndDelete(id);
-            return res.status(204).json();
-        }        
+        const { status, err } = await DeleteRecipeService.execute(id);
+
+        if (err) return res.status(status).json({ message: err.message });
+        return res.status(status).json();              
     },
 };

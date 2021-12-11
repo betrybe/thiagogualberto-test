@@ -1,43 +1,27 @@
-const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
-const User = require('../models/Users');
-const authConfig = require('../config/config');
-
-function validateEmail(email) {
-    const re = /\S+@\S+\.\S+/;
-    return re.test(email);
-}
-
-function validateInfos(email, password) {
-    if ((email === undefined) || (password === undefined)) {
-        return false;
-    }        
-    return true;
-}
+const { validationResult } = require('express-validator');
+const LoginUserService = require('../services/LoginUserService');
 
 module.exports = {
     async login(req, res) {
         const { email, password } = req.body;
+        const errors = validationResult(req);
 
-        const validadeData = validateInfos(email, password);
-                
-        if (!validadeData) {
+        if (!email || !password) {
             return res.status(401).json({ message: 'All fields must be filled' });
         }
         
-        if (!validateEmail(email)) {
+        if (!errors.isEmpty()) {
             return res.status(401).json({ message: 'Incorrect username or password' });
         }
 
-        const userExists = await User.findOne({ email, password });
-        if (!userExists) {
-            return res.status(401).json({ message: 'Incorrect username or password' });
-        }
-        const id = mongoose.mongo.ObjectId(userExists.id).toString();
-        const payload = { id, email, role: userExists.role };
-        const { secret, expiresIn } = authConfig.jwt;
-        const token = jwt.sign(payload, secret, { subject: id, expiresIn });
+        const data = {
+            email,
+            password,
+        };
 
-        return res.status(200).json({ token });
+        const { status, err, token } = await LoginUserService.execute(data);
+        
+        if (err) return res.status(status).json({ message: err.message });
+        return res.status(status).json({ token });
     },
 };

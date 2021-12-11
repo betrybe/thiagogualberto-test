@@ -1,57 +1,45 @@
-const User = require('../models/Users');
-
-function validateEmail(email) {
-    const re = /\S+@\S+\.\S+/;
-    return re.test(email);
-}
-
-function validateInfos(name, email, password) {
-    if ((name === undefined) || (email === undefined) || (password === undefined)) {
-        return false;
-    }        
-    return true;
-}
+const { validationResult } = require('express-validator');
+const CreateUserService = require('../services/CreateUserService');
 
 module.exports = {
     async store(req, res) {
         const { name, email, password } = req.body;
-        const validadeData = validateInfos(name, email, password);
-                
-        if ((!validadeData) || (!validateEmail(email))) {
+        const errors = validationResult(req);
+        
+        if (!name || !password || !errors.isEmpty()) {
             return res.status(400).json({ message: 'Invalid entries. Try again.' });
         }
 
-        const userExists = await User.findOne({ email });
+        const data = {
+            name,
+            email,
+            password,
+            role: 'user',
+        };
 
-        if (userExists) {
-            return res.status(409).json({ message: 'Email already registered' });
-        } 
-
-        await User.create({ name, email, password, role: 'user' });
-
-        const user = { name, email, role: 'user' };
-
-        return res.status(201).json({ user });
+        const { status, err, user } = await CreateUserService.execute(data);
+        
+        if (err) return res.status(status).json({ message: err.message });
+        return res.status(status).json({ user });
     },
     async storeAdmin(req, res) {
-        if (req.role !== 'admin') {        
-            return res.status(403).json({ message: 'Only admins can register new admins' });
-        }
-
         const { name, email, password } = req.body;
-
-        const validadeData = validateInfos(name, email, password);
-        if ((!validadeData) || (!validateEmail(email))) {
+        const errors = validationResult(req);
+        
+        if (!name || !password || !errors.isEmpty()) {
             return res.status(400).json({ message: 'Invalid entries. Try again.' });
         }
+
+        const data = {
+            name,
+            email,
+            password,
+            role: 'admin',
+        };
+
+        const { status, err, user } = await CreateUserService.execute(data);
         
-        const userExists = await User.findOne({ email });
-        if (userExists) {
-            return res.status(409).json({ message: 'Email already registered' });
-        }
-
-        const user = await User.create({ name, email, password, role: 'admin' });
-
-        return res.status(201).json({ user });
+        if (err) return res.status(status).json({ message: err.message });
+        return res.status(status).json({ user });
     },
 };
