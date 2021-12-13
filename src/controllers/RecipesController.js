@@ -50,6 +50,7 @@ module.exports = {
         const { id } = req.params;
         const { name, ingredients, preparation } = req.body;
         const userId = req.id;
+        const roleUser = req.role;
 
         const data = {
             id,
@@ -57,6 +58,7 @@ module.exports = {
             ingredients, 
             preparation, 
             userId, 
+            roleUser,
         };
         
         const { status, err, recipeUpdated } = await UpdateRecipeService.execute(data);
@@ -66,8 +68,16 @@ module.exports = {
     },
     async delete(req, res) {        
         const { id } = req.params;
+        const userId = req.id;
+        const roleUser = req.role;
+
+        const data = {
+            id,
+            userId,
+            roleUser,
+        };
         
-        const { status, err } = await DeleteRecipeService.execute(id);
+        const { status, err } = await DeleteRecipeService.execute(data);
 
         if (err) return res.status(status).json({ message: err.message });
         return res.status(status).json();              
